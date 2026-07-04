@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 20% 12%;
+
+    --primary: 231 62% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 222 20% 20%;
+
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 231 62% 96%;
+    --accent-foreground: 231 62% 40%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 64% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 30 40% 15%;
+
+    --border: 214 20% 90%;
+    --input: 214 20% 88%;
+    --ring: 231 62% 55%;
+
+    --sidebar: 222 24% 13%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-border: 222 20% 22%;
+    --sidebar-accent: 231 62% 55%;
+
+    --radius: 0.6rem;
+  }
+
+  .dark {
+    --background: 222 24% 9%;
+    --foreground: 210 20% 92%;
+
+    --card: 222 22% 12%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 222 22% 12%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 231 70% 66%;
+    --primary-foreground: 222 40% 10%;
+
+    --secondary: 222 18% 18%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 222 18% 18%;
+    --muted-foreground: 215 15% 60%;
+
+    --accent: 231 40% 22%;
+    --accent-foreground: 231 70% 85%;
+
+    --destructive: 0 62% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 55% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 88% 55%;
+    --warning-foreground: 30 40% 12%;
+
+    --border: 222 18% 20%;
+    --input: 222 18% 22%;
+    --ring: 231 70% 66%;
+
+    --sidebar: 222 28% 7%;
+    --sidebar-foreground: 210 20% 88%;
+    --sidebar-border: 222 20% 16%;
+    --sidebar-accent: 231 70% 66%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    overflow: hidden;
+  }
+  /* RTL / LTR direction handled via [dir] attribute on <html> */
+}
+
+/* Thin custom scrollbars for a native desktop feel */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/25 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/40;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Drag region for a frameless-feeling top bar */
+.drag-region {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}

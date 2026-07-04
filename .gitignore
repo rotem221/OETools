@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+dist/
+dist-ssr/
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Logs & local data
+*.log
+*.sqlite3
+*.sqlite3-*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.local
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Built installers (shared via GitHub Releases, not committed)
+final installs/**/*.dmg
+final installs/**/*.zip
+final installs/**/*.exe
+final installs/**/*.msi
