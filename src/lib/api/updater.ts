@@ -36,7 +36,17 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
   if (!isTauri()) return null;
   const { check } = await import("@tauri-apps/plugin-updater");
   const currentVersion = await getAppVersion();
-  const update = await check();
+
+  let update: import("@tauri-apps/plugin-updater").Update | null = null;
+  try {
+    update = await check();
+  } catch (err) {
+    // A missing/unreachable release endpoint (e.g. no release published yet,
+    // 404, or offline) is not a real error for the user — report up to date.
+    console.warn("Update check unavailable:", err);
+    return { available: false, version: currentVersion, currentVersion };
+  }
+
   pendingUpdate = update;
   if (!update) {
     return { available: false, version: currentVersion, currentVersion };

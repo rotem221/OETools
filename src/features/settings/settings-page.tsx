@@ -36,7 +36,9 @@ import { useAppStore } from "@/lib/store/app-store";
 import { api } from "@/lib/api/client";
 import { toast } from "@/lib/store/toast-store";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import type { AppSettings, Language, ThemeMode } from "@/lib/db-types";
+import { AboutSection } from "@/features/about/about-page";
 
 function SettingRow({
   label,
@@ -88,6 +90,8 @@ export function SettingsPage() {
   const updateSettings = useAppStore((s) => s.updateSettings);
   const [confirmReset, setConfirmReset] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") === "about" ? "about" : "general";
 
   const { data: deps, refetch, isFetching } = useQuery({
     queryKey: ["dependencies"],
@@ -122,13 +126,14 @@ export function SettingsPage() {
         title={t("settings.title")}
       />
 
-      <Tabs defaultValue="general">
+      <Tabs defaultValue={defaultTab}>
         <TabsList>
           <TabsTrigger value="general">{t("settings.general")}</TabsTrigger>
           <TabsTrigger value="storage">{t("settings.storage")}</TabsTrigger>
           <TabsTrigger value="privacy">{t("settings.privacy")}</TabsTrigger>
           <TabsTrigger value="dependencies">{t("settings.dependencies")}</TabsTrigger>
           <TabsTrigger value="advanced">{t("settings.advanced")}</TabsTrigger>
+          <TabsTrigger value="about">{t("about.title")}</TabsTrigger>
         </TabsList>
 
         {/* GENERAL */}
@@ -383,6 +388,11 @@ export function SettingsPage() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ABOUT */}
+        <TabsContent value="about">
+          <AboutSection />
         </TabsContent>
       </Tabs>
 

@@ -127,3 +127,63 @@
 .no-drag {
   -webkit-app-region: no-drag;
 }
+
+/* Native desktop feel: the UI chrome isn't selectable — only real text is.
+   This stops the whole interface from behaving like a selectable web page. */
+html {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+div,
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+dd,
+dt,
+td,
+th,
+code,
+pre,
+blockquote,
+label,
+small,
+strong,
+em,
+b,
+i,
+input,
+textarea,
+[contenteditable="true"],
+.selectable {
+  -webkit-user-select: text;
+  user-select: text;
+}
+/* Interactive controls and window chrome must never be selectable. */
+button,
+button *,
+a,
+a *,
+[role="button"],
+[role="button"] *,
+[role="tab"],
+[role="tab"] *,
+[role="menuitem"],
+[role="menuitem"] *,
+.drag-region,
+.drag-region *,
+.no-select,
+.no-select * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+/* Images should never be draggable (avoids the ghost-drag web behavior). */
+img {
+  -webkit-user-drag: none;
+}

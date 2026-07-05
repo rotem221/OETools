@@ -31,7 +31,6 @@ import { SupervisionPage } from "@/features/business/supervision-page";
 import { FleetPage } from "@/features/business/fleet-page";
 import { PrivacyCenterPage } from "@/features/privacy/privacy-center-page";
 import { SettingsPage } from "@/features/settings/settings-page";
-import { AboutPage } from "@/features/about/about-page";
 
 const backupsTabs: DomainTab[] = [
   { to: "/backups", labelKey: "nav.backupManager", end: true },
@@ -136,7 +135,7 @@ export function AppRoutes() {
         {/* Settings & Privacy */}
         <Route path="/privacy" element={<PrivacyCenterPage />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/about" element={<AboutPage />} />
+        <Route path="/about" element={<Navigate to="/settings?tab=about" replace />} />
 
         {/* Back-compat redirects for older links */}
         <Route path="/media" element={<Navigate to="/transfer" replace />} />

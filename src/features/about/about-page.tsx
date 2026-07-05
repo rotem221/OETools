@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Info,
   Heart,
   ExternalLink,
   ShieldCheck,
@@ -11,7 +10,6 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
-import { PageHeader } from "@/components/shared/page-header";
 import {
   Card,
   CardContent,
@@ -37,7 +35,7 @@ import {
 import dnpLogoLight from "@/assets/brand/dnp-logo-light.png";
 import dnpLogoDark from "@/assets/brand/dnp-logo-dark.png";
 
-const WEBSITE_URL = "https://dnpai.co.il";
+const WEBSITE_URL = "https://dnp.co.il";
 
 async function openExternal(url: string) {
   if (isTauri()) {
@@ -57,7 +55,7 @@ type UpdateStatus =
   | "installed"
   | "error";
 
-export function AboutPage() {
+export function AboutSection() {
   const { t } = useTranslation();
   const [version, setVersion] = useState("0.1.0");
   const [status, setStatus] = useState<UpdateStatus>("idle");
@@ -80,8 +78,11 @@ export function AboutPage() {
       } else {
         setStatus("upToDate");
       }
-    } catch {
-      setStatus("error");
+    } catch (err) {
+      // No published release / offline endpoint should never look like a
+      // failure to the user — treat it as "already up to date".
+      console.warn("Update check skipped:", err);
+      setStatus("upToDate");
     }
   };
 
@@ -107,15 +108,15 @@ export function AboutPage() {
 
   return (
     <>
-      <PageHeader
-        icon={<Info className="h-5 w-5" />}
-        title={t("about.title")}
-      />
-
       {/* Brand / credit card */}
       <Card className="overflow-hidden">
         <CardContent className="flex flex-col items-center gap-5 py-10 text-center">
-          <picture>
+          <button
+            type="button"
+            onClick={() => void openExternal(WEBSITE_URL)}
+            title={WEBSITE_URL}
+            className="no-select cursor-pointer rounded-md transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             <img
               src={dnpLogoLight}
               alt="DNP AI Solutions"
@@ -126,7 +127,7 @@ export function AboutPage() {
               alt="DNP AI Solutions"
               className="hidden h-16 w-auto object-contain dark:block"
             />
-          </picture>
+          </button>
 
           <div className="space-y-1">
             <h2 className="text-2xl font-semibold tracking-tight">
