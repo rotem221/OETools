@@ -15,12 +15,12 @@ export type UpdateProgress =
 
 /** Returns the running application version (falls back to package version). */
 export async function getAppVersion(): Promise<string> {
-  if (!isTauri()) return "0.1.0";
+  if (!isTauri()) return "0.1.1";
   try {
     const { getVersion } = await import("@tauri-apps/api/app");
     return await getVersion();
   } catch {
-    return "0.1.0";
+    return "0.1.1";
   }
 }
 

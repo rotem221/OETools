@@ -1,7 +1,7 @@
 {
   "name": "oetools",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "OETools (Or Eliav Tools) — a privacy-first, local iOS/iPadOS device management utility.",
   "scripts": {

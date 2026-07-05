@@ -1,6 +1,6 @@
 [package]
 name = "idevice-desk"
-version = "0.1.0"
+version = "0.1.1"
 description = "OETools (Or Eliav Tools) — privacy-first local iOS/iPadOS device management utility"
 authors = ["Or Eliav"]
 edition = "2021"
