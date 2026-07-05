@@ -40,7 +40,7 @@
     "shortDescription": "Privacy-first local iOS/iPadOS device manager",
     "longDescription": "OETools (Or Eliav Tools) is a local-first desktop utility for managing connected iPhone/iPad devices over USB: device info, backups, media export, diagnostics and reports. No cloud, no telemetry, no security bypasses.",
     "macOS": {
-      "signingIdentity": "-"
+      "hardenedRuntime": true
     },
     "windows": {
       "webviewInstallMode": {
