@@ -14,7 +14,9 @@ export type JobType =
   | "media_convert"
   | "backup_extract"
   | "message_export"
-  | "security_scan";
+  | "security_scan"
+  | "data_export"
+  | "device_transfer";
 
 export type JobStatus =
   | "queued"
@@ -352,6 +354,90 @@ export interface MessageEntry {
   sent_at: string | null;
   service: string;
   has_attachment: boolean;
+}
+
+// ---- Data export: contacts & notes ----
+
+export interface ContactEntry {
+  id: string;
+  name: string;
+  organization: string | null;
+  phones: string[];
+  emails: string[];
+}
+
+export interface NoteEntry {
+  id: string;
+  title: string;
+  snippet: string;
+  folder: string | null;
+  modified_at: string | null;
+  body: string | null;
+}
+
+// ---- Device file browser / transfer ----
+
+export interface DeviceFileEntry {
+  name: string;
+  path: string;
+  is_dir: boolean;
+  size_bytes: number;
+  modified_at: string | null;
+}
+
+// ---- Business: profiles, supervision, fleet ----
+
+export interface ConfigProfile {
+  id: string;
+  name: string | null;
+  organization: string | null;
+  identifier: string | null;
+  profile_type: string | null;
+  path: string | null;
+  installed_at: string | null;
+}
+
+export interface ProfileTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  payload_type: string;
+  profile_json: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupervisionInfo {
+  udid: string;
+  device_name: string | null;
+  supervised: boolean;
+  organization_name: string | null;
+  last_checked_at: string | null;
+}
+
+export interface DeviceAsset {
+  device_udid: string;
+  device_name: string | null;
+  model: string | null;
+  os_version: string | null;
+  employee_name: string | null;
+  department: string | null;
+  location: string | null;
+  asset_tag: string | null;
+  notes: string | null;
+  updated_at: string | null;
+}
+
+// ---- Export history & evidence ----
+
+export interface ExportHistoryEntry {
+  id: string;
+  kind: string;
+  label: string;
+  output_path: string | null;
+  item_count: number | null;
+  evidence: boolean;
+  created_at: string;
 }
 
 // ---- Security / spyware analyzer ----

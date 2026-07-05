@@ -339,6 +339,100 @@ pub struct MessageEntry {
     pub has_attachment: bool,
 }
 
+// ---- Data export: contacts & notes ----
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ContactEntry {
+    pub id: String,
+    pub name: String,
+    pub organization: Option<String>,
+    pub phones: Vec<String>,
+    pub emails: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NoteEntry {
+    pub id: String,
+    pub title: String,
+    pub snippet: String,
+    pub folder: Option<String>,
+    pub modified_at: Option<String>,
+    pub body: Option<String>,
+}
+
+// ---- Device file browser / transfer (AFC) ----
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceFileEntry {
+    pub name: String,
+    pub path: String,
+    pub is_dir: bool,
+    pub size_bytes: i64,
+    pub modified_at: Option<String>,
+}
+
+// ---- Business: profiles, supervision, fleet ----
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConfigProfile {
+    pub id: String,
+    pub name: Option<String>,
+    pub organization: Option<String>,
+    pub identifier: Option<String>,
+    pub profile_type: Option<String>,
+    pub path: Option<String>,
+    pub installed_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProfileTemplate {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub payload_type: String,
+    pub profile_json: String,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SupervisionInfo {
+    pub udid: String,
+    pub device_name: Option<String>,
+    pub supervised: bool,
+    pub organization_name: Option<String>,
+    pub last_checked_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceAsset {
+    pub device_udid: String,
+    pub device_name: Option<String>,
+    pub model: Option<String>,
+    pub os_version: Option<String>,
+    pub employee_name: Option<String>,
+    pub department: Option<String>,
+    pub location: Option<String>,
+    pub asset_tag: Option<String>,
+    pub notes: Option<String>,
+    pub updated_at: Option<String>,
+}
+
+// ---- Export history & evidence packages ----
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExportHistoryEntry {
+    pub id: String,
+    /// Origin table: "messages" | "data" | "evidence"
+    pub kind: String,
+    /// Human label of what was exported (e.g. "contacts", "whatsapp", "evidence").
+    pub label: String,
+    pub output_path: Option<String>,
+    pub item_count: Option<i64>,
+    pub evidence: bool,
+    pub created_at: String,
+}
+
 // ---- Security / spyware analyzer ----
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

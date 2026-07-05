@@ -359,6 +359,14 @@ const MIGRATIONS: &[(&str, &str)] = &[(
     );
     CREATE INDEX IF NOT EXISTS idx_battery_device ON battery_snapshots(device_udid);
     "#,
+),
+(
+    "0004_business_unique_indexes",
+    r#"
+    -- One supervision/asset record per device (enables upserts).
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_supervision_device_unique ON supervision_states(device_udid);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_assets_device_unique ON device_assets(device_udid);
+    "#,
 )];
 
 pub fn run_migrations(conn: &Connection) -> rusqlite::Result<()> {

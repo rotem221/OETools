@@ -619,6 +619,67 @@ fn ns_to_rfc3339(ns: u64) -> String {
         .unwrap_or_default()
 }
 
+/// List a directory on the device over AFC, returning typed entries (name,
+/// dir/file, size, mtime). Used by the File Browser.
+pub fn afc_list_dir(udid: &str, path: &str) -> Result<Vec<DeviceFileEntry>, CommandError> {
+    let bin = tool(TOOL_AFC)?;
+    let base = if path.is_empty() { "/" } else { path };
+    let names = afc_ls(&bin, udid, base)?;
+    let mut out = Vec::new();
+    for name in names.into_iter().take(1000) {
+        if name == "." || name == ".." {
+            continue;
+        }
+        let full = if base == "/" {
+            format!("/{name}")
+        } else {
+            format!("{}/{}", base.trim_end_matches('/'), name)
+        };
+        let info = command_runner::run(&bin, &["-u", udid, "info", &full], Duration::from_secs(15));
+        let (is_dir, size, ns) = match info {
+            Ok(o) if o.success => {
+                let v: serde_json::Value =
+                    serde_json::from_str(o.stdout.trim()).unwrap_or(serde_json::Value::Null);
+                let ifmt = v.get("st_ifmt").and_then(|x| x.as_str()).unwrap_or("");
+                let size = v.get("st_size").and_then(|x| x.as_i64()).unwrap_or(0);
+                let ns = v
+                    .get("st_mtime")
+                    .and_then(|x| x.as_u64())
+                    .or_else(|| v.get("st_birthtime").and_then(|x| x.as_u64()))
+                    .unwrap_or(0);
+                (ifmt == "S_IFDIR", size, ns)
+            }
+            _ => (false, 0, 0),
+        };
+        out.push(DeviceFileEntry {
+            name,
+            path: full,
+            is_dir,
+            size_bytes: size,
+            modified_at: if ns > 0 { Some(ns_to_rfc3339(ns)) } else { None },
+        });
+    }
+    out.sort_by(|a, b| b.is_dir.cmp(&a.is_dir).then(a.name.cmp(&b.name)));
+    Ok(out)
+}
+
+/// Upload a single local file to the device over AFC (`afcclient put`).
+pub fn afc_put(udid: &str, local: &str, remote: &str) -> Result<(), CommandError> {
+    let bin = tool(TOOL_AFC)?;
+    let out = command_runner::run(
+        &bin,
+        &["-u", udid, "put", local, remote],
+        Duration::from_secs(600),
+    )
+    .map_err(|e| e.with_dependency(TOOL_AFC).with_fix(dep_hint()))?;
+    if out.success {
+        Ok(())
+    } else {
+        Err(CommandError::new(format!("Failed to copy file to {remote}."))
+            .with_details(out.stderr))
+    }
+}
+
 /// Copy a single file from the device (`remote`, an absolute `/DCIM/...` path)
 /// to a local `dest` file path, over AFC.
 pub fn afc_get(udid: &str, remote: &str, dest: &str) -> Result<(), CommandError> {

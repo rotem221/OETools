@@ -7,24 +7,32 @@ import type {
   BackupSourceInfo,
   BatterySnapshot,
   CommandResult,
+  ConfigProfile,
+  ContactEntry,
   ConvertResult,
   DependencyInfo,
+  DeviceAsset,
+  DeviceFileEntry,
   DeviceInfo,
   DeviceSummary,
+  ExportHistoryEntry,
   Job,
   MediaItem,
   MediaMeta,
   MediaThumb,
   MessageEntry,
   MessageThread,
+  NoteEntry,
   OperationLog,
   PrivacySummary,
+  ProfileTemplate,
   Report,
   ReportType,
   RetentionPolicy,
   ScheduledBackup,
   SecurityFinding,
   SecurityScan,
+  SupervisionInfo,
 } from "@/lib/db-types";
 import * as mock from "./mock-data";
 
@@ -457,6 +465,209 @@ export const api = {
     if (isTauri())
       return tauriInvoke("export_messages", { path, chatId, destination, format });
     return ok(`${destination}/messages.${format}`);
+  },
+
+  // ---- Data export: contacts ----
+  async listContacts(path: string): Promise<CommandResult<ContactEntry[]>> {
+    if (isTauri()) return tauriInvoke("list_contacts", { path });
+    return ok(mock.mockContacts);
+  },
+  async exportContacts(
+    path: string,
+    destination: string,
+    format: string,
+  ): Promise<CommandResult<string>> {
+    if (isTauri())
+      return tauriInvoke("export_contacts", { path, destination, format });
+    return ok(`${destination}/contacts.${format === "csv" ? "csv" : "vcf"}`);
+  },
+
+  // ---- Data export: notes ----
+  async listNotes(path: string): Promise<CommandResult<NoteEntry[]>> {
+    if (isTauri()) return tauriInvoke("list_notes", { path });
+    return ok(mock.mockNotes);
+  },
+  async getNote(path: string, noteId: string): Promise<CommandResult<NoteEntry>> {
+    if (isTauri()) return tauriInvoke("get_note", { path, noteId });
+    return ok(mock.mockNotes.find((n) => n.id === noteId) ?? mock.mockNotes[0]);
+  },
+  async exportNotes(
+    path: string,
+    destination: string,
+    format: string,
+  ): Promise<CommandResult<string>> {
+    if (isTauri())
+      return tauriInvoke("export_notes", { path, destination, format });
+    return ok(`${destination}/notes.${format === "csv" ? "csv" : "html"}`);
+  },
+
+  // ---- Data export: WhatsApp ----
+  async listWaChats(path: string): Promise<CommandResult<MessageThread[]>> {
+    if (isTauri()) return tauriInvoke("list_wa_chats", { path });
+    return ok(mock.mockConversations);
+  },
+  async getWaChat(
+    path: string,
+    chatId: string,
+    limit?: number,
+  ): Promise<CommandResult<MessageEntry[]>> {
+    if (isTauri())
+      return tauriInvoke("get_wa_chat", { path, chatId, limit: limit ?? null });
+    return ok(mock.mockConversationMessages);
+  },
+  async exportWaChat(
+    path: string,
+    chatId: string,
+    destination: string,
+    format: string,
+  ): Promise<CommandResult<string>> {
+    if (isTauri())
+      return tauriInvoke("export_wa_chat", { path, chatId, destination, format });
+    return ok(`${destination}/whatsapp.${format}`);
+  },
+
+  // ---- Data export: export everything ----
+  async exportAllData(
+    path: string,
+    destination: string,
+  ): Promise<CommandResult<Job>> {
+    if (isTauri()) return tauriInvoke("export_all_data", { path, destination });
+    await delay(200);
+    return ok({ ...mock.mockJobs[0], job_type: "data_export", progress: 0 });
+  },
+
+  // ---- Device file browser + quick transfer ----
+  async listDeviceFiles(
+    udid: string,
+    path: string,
+  ): Promise<CommandResult<DeviceFileEntry[]>> {
+    if (isTauri()) return tauriInvoke("list_device_files", { udid, path });
+    return ok(mock.mockDeviceDir(path));
+  },
+  async downloadDeviceFiles(
+    udid: string,
+    paths: string[],
+    destination: string,
+  ): Promise<CommandResult<Job>> {
+    if (isTauri())
+      return tauriInvoke("download_device_files", { udid, paths, destination });
+    await delay(200);
+    return ok({ ...mock.mockJobs[0], job_type: "device_transfer", progress: 0 });
+  },
+  async uploadToDevice(
+    udid: string,
+    files: string[],
+    remoteDir: string,
+  ): Promise<CommandResult<Job>> {
+    if (isTauri())
+      return tauriInvoke("upload_to_device", { udid, files, remoteDir });
+    await delay(200);
+    return ok({ ...mock.mockJobs[0], job_type: "device_transfer", progress: 0 });
+  },
+  async cancelTransfer(jobId: string): Promise<CommandResult<null>> {
+    if (isTauri()) return tauriInvoke("cancel_transfer", { jobId });
+    return ok(null);
+  },
+
+  // ---- Export history + evidence ----
+  async listExportHistory(): Promise<CommandResult<ExportHistoryEntry[]>> {
+    if (isTauri()) return tauriInvoke("list_export_history");
+    return ok(mock.mockExportHistory);
+  },
+  async openExport(path: string): Promise<CommandResult<null>> {
+    if (isTauri()) return tauriInvoke("open_export", { path });
+    return ok(null);
+  },
+  async deleteExport(id: string, kind: string): Promise<CommandResult<null>> {
+    if (isTauri()) return tauriInvoke("delete_export", { id, kind });
+    return ok(null);
+  },
+  async createEvidencePackage(
+    path: string,
+    categories: string[],
+    destination: string,
+    operator?: string,
+    organization?: string,
+    caseId?: string,
+    notes?: string,
+  ): Promise<CommandResult<Job>> {
+    if (isTauri())
+      return tauriInvoke("create_evidence_package", {
+        path,
+        categories,
+        destination,
+        operator: operator ?? null,
+        organization: organization ?? null,
+        caseId: caseId ?? null,
+        notes: notes ?? null,
+      });
+    await delay(200);
+    return ok({ ...mock.mockJobs[0], job_type: "data_export", progress: 0 });
+  },
+
+  // ---- Business: configuration profiles ----
+  async importProfile(path: string): Promise<CommandResult<ConfigProfile>> {
+    if (isTauri()) return tauriInvoke("import_profile", { path });
+    return ok(mock.mockProfiles[0]);
+  },
+  async listProfiles(): Promise<CommandResult<ConfigProfile[]>> {
+    if (isTauri()) return tauriInvoke("list_profiles");
+    return ok(mock.mockProfiles);
+  },
+  async deleteProfile(id: string): Promise<CommandResult<null>> {
+    if (isTauri()) return tauriInvoke("delete_profile", { id });
+    return ok(null);
+  },
+  async exportProfile(id: string, destination: string): Promise<CommandResult<string>> {
+    if (isTauri()) return tauriInvoke("export_profile", { id, destination });
+    return ok(`${destination}/profile.mobileconfig`);
+  },
+
+  // ---- Business: profile generator ----
+  async listProfileTemplates(): Promise<CommandResult<ProfileTemplate[]>> {
+    if (isTauri()) return tauriInvoke("list_profile_templates");
+    return ok(mock.mockProfileTemplates);
+  },
+  async saveProfileTemplate(
+    template: ProfileTemplate,
+  ): Promise<CommandResult<ProfileTemplate>> {
+    if (isTauri()) return tauriInvoke("save_profile_template", { template });
+    return ok(template);
+  },
+  async deleteProfileTemplate(id: string): Promise<CommandResult<null>> {
+    if (isTauri()) return tauriInvoke("delete_profile_template", { id });
+    return ok(null);
+  },
+  async exportProfileTemplate(id: string, destination: string): Promise<CommandResult<string>> {
+    if (isTauri()) return tauriInvoke("export_profile_template", { id, destination });
+    return ok(`${destination}/profile.mobileconfig`);
+  },
+
+  // ---- Business: supervision ----
+  async listSupervision(): Promise<CommandResult<SupervisionInfo[]>> {
+    if (isTauri()) return tauriInvoke("list_supervision");
+    return ok(mock.mockSupervision);
+  },
+  async refreshSupervision(udid: string): Promise<CommandResult<SupervisionInfo>> {
+    if (isTauri()) return tauriInvoke("refresh_supervision", { udid });
+    return ok(mock.mockSupervision.find((s) => s.udid === udid) ?? mock.mockSupervision[0]);
+  },
+  async setSupervisionOrg(
+    udid: string,
+    organization: string | null,
+  ): Promise<CommandResult<null>> {
+    if (isTauri()) return tauriInvoke("set_supervision_org", { udid, organization });
+    return ok(null);
+  },
+
+  // ---- Business: fleet / assets ----
+  async listAssets(): Promise<CommandResult<DeviceAsset[]>> {
+    if (isTauri()) return tauriInvoke("list_assets");
+    return ok(mock.mockAssets);
+  },
+  async saveAsset(asset: DeviceAsset): Promise<CommandResult<null>> {
+    if (isTauri()) return tauriInvoke("save_asset", { asset });
+    return ok(null);
   },
 
   // ---- Security analyzer ----

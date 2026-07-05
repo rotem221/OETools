@@ -10,6 +10,8 @@ import {
   FolderInput,
   MessageSquare,
   ShieldAlert,
+  PackageOpen,
+  ArrowLeftRight,
   X,
   Ban,
   Trash2,
@@ -36,6 +38,8 @@ const jobIcons: Record<JobType, typeof Archive> = {
   backup_extract: FolderInput,
   message_export: MessageSquare,
   security_scan: ShieldAlert,
+  data_export: PackageOpen,
+  device_transfer: ArrowLeftRight,
 };
 
 function JobItem({ job }: { job: Job }) {

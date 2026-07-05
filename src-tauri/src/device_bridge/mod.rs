@@ -3,7 +3,9 @@ pub mod mock;
 pub mod parser;
 
 use crate::core::errors::CommandError;
-use crate::models::{DeviceInfo, DeviceSummary, MediaItem, MediaMeta, MediaThumb};
+use crate::models::{
+    DeviceFileEntry, DeviceInfo, DeviceSummary, MediaItem, MediaMeta, MediaThumb,
+};
 
 /// Selects between the mock bridge and the real libimobiledevice bridge.
 /// When `mock` is true (settings or missing dependencies), the deterministic
@@ -99,6 +101,35 @@ impl Bridge {
             Ok(())
         } else {
             libimobiledevice::afc_get(udid, remote_path, dest)
+        }
+    }
+
+    /// List a directory on the device over AFC (File Browser).
+    pub fn list_dir(&self, udid: &str, path: &str) -> Result<Vec<DeviceFileEntry>, CommandError> {
+        if self.mock {
+            Ok(mock::mock_device_dir(path))
+        } else {
+            libimobiledevice::afc_list_dir(udid, path)
+        }
+    }
+
+    /// Upload a local file to the device over AFC (Quick Transfer).
+    pub fn upload_file(&self, udid: &str, local: &str, remote: &str) -> Result<(), CommandError> {
+        if self.mock {
+            let _ = (udid, local, remote);
+            Ok(())
+        } else {
+            libimobiledevice::afc_put(udid, local, remote)
+        }
+    }
+
+    /// Download an arbitrary file from the device over AFC (File Browser).
+    pub fn download_file(&self, udid: &str, remote: &str, dest: &str) -> Result<(), CommandError> {
+        if self.mock {
+            let _ = (udid, remote, dest);
+            Ok(())
+        } else {
+            libimobiledevice::afc_get(udid, remote, dest)
         }
     }
 }

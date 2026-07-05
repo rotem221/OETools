@@ -9,14 +9,22 @@ import type {
   BackupSnapshot,
   BackupSourceInfo,
   BatterySnapshot,
+  ConfigProfile,
+  ContactEntry,
   DependencyInfo,
+  DeviceAsset,
+  DeviceFileEntry,
   DeviceInfo,
   DeviceSummary,
+  ExportHistoryEntry,
   Job,
   MediaItem,
   MessageEntry,
   MessageThread,
+  NoteEntry,
   OperationLog,
+  ProfileTemplate,
+  SupervisionInfo,
   PrivacySummary,
   Report,
   RetentionPolicy,
@@ -470,6 +478,74 @@ export const mockConversationMessages: MessageEntry[] = [
   { id: "m1", from_me: false, sender: "+15551234567", text: "Hey, are we still on for tomorrow?", sent_at: daysAgo(1), service: "iMessage", has_attachment: false },
   { id: "m2", from_me: true, sender: "Me", text: "Yes! 10am works.", sent_at: daysAgo(1), service: "iMessage", has_attachment: false },
   { id: "m3", from_me: false, sender: "+15551234567", text: "See you tomorrow!", sent_at: daysAgo(1), service: "iMessage", has_attachment: false },
+];
+
+// ---- Data export: contacts & notes ----
+
+export const mockContacts: ContactEntry[] = [
+  { id: "1", name: "Alex Johnson", organization: "Acme Inc.", phones: ["+15551234567"], emails: ["alex@example.com"] },
+  { id: "2", name: "Dana Levi", organization: null, phones: ["+15559876543"], emails: ["dana@example.com", "dana.work@example.com"] },
+  { id: "3", name: "Sam Cohen", organization: "Studio 5", phones: ["+15550001111"], emails: [] },
+];
+
+export const mockNotes: NoteEntry[] = [
+  { id: "1", title: "Shopping list", snippet: "Milk, eggs, bread…", folder: "Notes", modified_at: daysAgo(1), body: "Milk\nEggs\nBread\nCoffee" },
+  { id: "2", title: "Trip ideas", snippet: "Places to visit next summer", folder: "Travel", modified_at: daysAgo(9), body: "Places to visit next summer:\n- Lisbon\n- Kyoto\n- Reykjavik" },
+];
+
+// ---- Device file browser ----
+
+export function mockDeviceDir(path: string): DeviceFileEntry[] {
+  const base = !path || path === "/" ? "" : path.replace(/\/$/, "");
+  if (!base) {
+    return ["DCIM", "Downloads", "Photos", "Books", "PublicStaging"].map((d) => ({
+      name: d,
+      path: `/${d}`,
+      is_dir: true,
+      size_bytes: 0,
+      modified_at: now(),
+    }));
+  }
+  return Array.from({ length: 6 }, (_, i) => {
+    const isDir = i < 2;
+    const name = isDir ? `${100 + i}APPLE` : `IMG_${4200 + i}.HEIC`;
+    return {
+      name,
+      path: `${base}/${name}`,
+      is_dir: isDir,
+      size_bytes: isDir ? 0 : (2 + i) * 1024 * 1024,
+      modified_at: now(),
+    };
+  });
+}
+
+// ---- Business: profiles, supervision, fleet ----
+
+export const mockProfiles: ConfigProfile[] = [
+  { id: "p1", name: "Corp Wi-Fi", organization: "Acme Inc.", identifier: "com.acme.wifi", profile_type: "Configuration", path: "~/OETools/profiles/corp-wifi.mobileconfig", installed_at: daysAgo(12) },
+  { id: "p2", name: "Kiosk Restrictions", organization: "Acme Inc.", identifier: "com.acme.kiosk", profile_type: "Configuration", path: "~/OETools/profiles/kiosk.mobileconfig", installed_at: daysAgo(30) },
+];
+
+export const mockProfileTemplates: ProfileTemplate[] = [
+  { id: "t1", name: "Company Portal", description: "Web clip to the company portal", payload_type: "webclip", profile_json: JSON.stringify({ label: "Portal", url: "https://portal.example.com" }), created_at: daysAgo(5), updated_at: daysAgo(5) },
+];
+
+export const mockSupervision: SupervisionInfo[] = [
+  { udid: "00008110-000A1B2C3D4E5F6G", device_name: "Personal iPhone", supervised: false, organization_name: null, last_checked_at: daysAgo(1) },
+  { udid: "00008103-0011AABB22CC33DD", device_name: "Kiosk iPad", supervised: true, organization_name: "Acme Inc.", last_checked_at: daysAgo(1) },
+];
+
+export const mockAssets: DeviceAsset[] = [
+  { device_udid: "00008110-000A1B2C3D4E5F6G", device_name: "Personal iPhone", model: "iPhone 14 Pro Max", os_version: "17.5.1", employee_name: "Alex Johnson", department: "Sales", location: "HQ", asset_tag: "ACME-0142", notes: null, updated_at: daysAgo(3) },
+  { device_udid: "00008103-0011AABB22CC33DD", device_name: "Kiosk iPad", model: "iPad (9th gen)", os_version: "17.4", employee_name: null, department: "Front desk", location: "Lobby", asset_tag: "ACME-0210", notes: "Wall-mounted", updated_at: daysAgo(8) },
+];
+
+// ---- Export history ----
+
+export const mockExportHistory: ExportHistoryEntry[] = [
+  { id: "e1", kind: "data", label: "contacts", output_path: "~/OETools/exports/contacts_20260705.vcf", item_count: 128, evidence: false, created_at: daysAgo(0) },
+  { id: "e2", kind: "data", label: "messages", output_path: "~/OETools/exports/messages_1.html", item_count: 842, evidence: false, created_at: daysAgo(2) },
+  { id: "e3", kind: "evidence", label: "evidence", output_path: "~/OETools/exports/OETools_evidence_20260701", item_count: null, evidence: true, created_at: daysAgo(4) },
 ];
 
 // ---- Security analyzer ----

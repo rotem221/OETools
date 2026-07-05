@@ -1726,10 +1726,12 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "dirs 5.0.1",
+ "flate2",
  "plist",
  "rusqlite",
  "serde",
  "serde_json",
+ "sha2",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",

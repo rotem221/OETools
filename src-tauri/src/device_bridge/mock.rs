@@ -176,6 +176,40 @@ pub fn mock_device_info(udid: &str) -> DeviceInfo {
     }
 }
 
+pub fn mock_device_dir(path: &str) -> Vec<DeviceFileEntry> {
+    let base = if path.is_empty() || path == "/" { "" } else { path.trim_end_matches('/') };
+    if base.is_empty() {
+        ["DCIM", "Downloads", "Photos", "Books", "PublicStaging"]
+            .iter()
+            .map(|d| DeviceFileEntry {
+                name: (*d).into(),
+                path: format!("/{d}"),
+                is_dir: true,
+                size_bytes: 0,
+                modified_at: Some(chrono::Utc::now().to_rfc3339()),
+            })
+            .collect()
+    } else {
+        (0..6)
+            .map(|i| {
+                let is_dir = i < 2;
+                let name = if is_dir {
+                    format!("{}APPLE", 100 + i)
+                } else {
+                    format!("IMG_{}.HEIC", 4200 + i)
+                };
+                DeviceFileEntry {
+                    path: format!("{base}/{name}"),
+                    is_dir,
+                    size_bytes: if is_dir { 0 } else { (2 + i) * 1024 * 1024 },
+                    modified_at: Some(chrono::Utc::now().to_rfc3339()),
+                    name,
+                }
+            })
+            .collect()
+    }
+}
+
 pub fn mock_media() -> Vec<MediaItem> {
     (0..24)
         .map(|i| {
