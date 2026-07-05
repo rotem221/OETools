@@ -5,6 +5,7 @@ import { useAppStore } from "@/lib/store/app-store";
 import { useDevices } from "@/features/devices/use-devices";
 import { onJobUpdate } from "@/lib/api/events";
 import { api } from "@/lib/api/client";
+import { runAutoUpdateOnStartup } from "@/lib/api/auto-update";
 
 /** Bootstraps global state (settings, devices, job stream) and gates onboarding. */
 export function App() {
@@ -21,6 +22,11 @@ export function App() {
   useEffect(() => {
     void loadSettings();
   }, [loadSettings]);
+
+  // Silently check for (and install) updates on startup when enabled.
+  useEffect(() => {
+    void runAutoUpdateOnStartup();
+  }, []);
 
   // Hydrate the Activity panel with existing jobs so history/in-progress work
   // is visible immediately (progress then keeps flowing via job events).

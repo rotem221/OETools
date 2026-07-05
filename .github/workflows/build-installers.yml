@@ -1,8 +1,14 @@
 name: Build installers
 
-# Produces the macOS (.dmg / .app) and Windows (.exe / .msi) installers.
-# Windows installers MUST be built on Windows (WebView2 + MSVC + WiX/NSIS),
-# so this cross-platform matrix runs each OS on its own native runner.
+# Produces the macOS (.dmg / .app) and Windows (.exe / .msi) installers and the
+# signed auto-updater artifacts (+ latest.json). Windows installers MUST be built
+# on Windows (WebView2 + MSVC + WiX/NSIS), so this cross-platform matrix runs
+# each OS on its own native runner.
+#
+# Auto-updates require two repository secrets to be configured:
+#   TAURI_SIGNING_PRIVATE_KEY          -> contents of src-tauri/.tauri/oetools_updater.key
+#   TAURI_SIGNING_PRIVATE_KEY_PASSWORD -> the password used when generating the key (empty by default)
+# The matching public key already lives in src-tauri/tauri.conf.json (plugins.updater.pubkey).
 
 on:
   push:
@@ -11,9 +17,9 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Attach built installers to this existing release tag (e.g. v0.1.0). Leave blank to only upload artifacts."
-        required: false
-        default: ""
+        description: "Create/attach a release with this tag (e.g. v0.1.0)."
+        required: true
+        default: "v0.1.0"
 
 permissions:
   contents: write
@@ -58,25 +64,17 @@ jobs:
       - name: Install frontend dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Build the app + installers
-        run: npm run tauri:build -- --target ${{ matrix.target }}
-
-      - name: Upload installers
-        uses: actions/upload-artifact@v4
+      - name: Build, sign & publish (installers + updater)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          name: OETools-${{ matrix.target }}
-          if-no-files-found: ignore
-          path: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
-            src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
-            src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi
-
-      - name: Publish installers to release
-        if: ${{ github.ref_type == 'tag' || github.event.inputs.release_tag != '' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || github.event.inputs.release_tag }}
-          files: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
-            src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
-            src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi
+          tagName: ${{ github.ref_type == 'tag' && github.ref_name || github.event.inputs.release_tag }}
+          releaseName: "OETools __VERSION__"
+          releaseBody: "See the assets below to download and install. Existing installs update automatically."
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+          args: --target ${{ matrix.target }}

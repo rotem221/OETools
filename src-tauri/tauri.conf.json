@@ -29,6 +29,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -49,6 +50,16 @@
       "nsis": {
         "installMode": "perMachine"
       }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "dialog": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEzQTg4QUU3REJCMjBEQjEKUldTeERiTGI1NHFvRTZ2aWY4bFpDYmJOOGo4a0RRbXBRN3hpaE1yMmtvaVltak12elFTNnFReEMK",
+      "endpoints": [
+        "https://github.com/rotem221/OETools/releases/latest/download/latest.json"
+      ]
     }
   }
 }

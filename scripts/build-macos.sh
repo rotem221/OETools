@@ -29,6 +29,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Sign the auto-updater artifacts (.app.tar.gz) with the local updater key so the
+# in-app updater can verify them. The public key lives in tauri.conf.json.
+KEY_FILE="$ROOT/src-tauri/.tauri/oetools_updater.key"
+if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ] && [ -f "$KEY_FILE" ]; then
+  export TAURI_SIGNING_PRIVATE_KEY="$(cat "$KEY_FILE")"
+  export TAURI_SIGNING_PRIVATE_KEY_PASSWORD="${TAURI_SIGNING_PRIVATE_KEY_PASSWORD:-}"
+fi
+
 echo "==> Building (Tauri signs the .app with Developer ID and notarizes it)"
 npm run tauri:build
 
@@ -58,6 +66,11 @@ if [ -n "$APP" ]; then
   rm -f "$ZIP"
   /usr/bin/ditto -c -k --keepParent "$APP" "$ZIP"
 fi
+
+# Copy the signed auto-updater artifacts (.app.tar.gz + .sig) if produced.
+for f in "$BUNDLE"/macos/*.app.tar.gz "$BUNDLE"/macos/*.app.tar.gz.sig; do
+  [ -e "$f" ] && cp "$f" "$DEST/"
+done
 
 echo "==> Verifying Gatekeeper acceptance"
 [ -n "$APP" ] && spctl -a -vvv -t exec "$APP" || true

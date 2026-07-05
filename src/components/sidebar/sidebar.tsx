@@ -11,6 +11,7 @@ import {
   Briefcase,
   Settings,
   ShieldCheck,
+  Info,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -93,6 +94,10 @@ export function Sidebar() {
         <NavItem
           item={{ to: "/settings", icon: Settings, key: "settings", end: true }}
           label={t("nav.settings")}
+        />
+        <NavItem
+          item={{ to: "/about", icon: Info, key: "about", end: true }}
+          label={t("nav.about")}
         />
       </div>
     </aside>
